@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Globalization;
 using System.Windows.Input;
 using Diary.Commands;
 using Diary.Models;
@@ -9,8 +10,11 @@ public class MainViewModel : ViewModelBase
 {
     private DiaryEntry? _selectedEntry;
     private DateTime _selectedDate = DateTime.Today;
+    private DateTime _displayedMonth = new(DateTime.Today.Year, DateTime.Today.Month, 1);
 
     public ObservableCollection<DiaryEntry> Entries { get; } = new();
+    public ObservableCollection<DayCell> Days { get; } = new();
+    public IReadOnlyList<string> DayHeaders { get; }
 
     public DiaryEntry? SelectedEntry
     {
@@ -35,11 +39,25 @@ public class MainViewModel : ViewModelBase
         set => SetProperty(ref _selectedDate, value);
     }
 
+    public string MonthTitle => _displayedMonth.ToString("MMMM yyyy");
+
     public ICommand CloseEntryCommand { get; }
+    public ICommand SelectDateCommand { get; }
 
     public MainViewModel()
     {
+        var dateTimeFormat = DateTimeFormatInfo.CurrentInfo;
+        var names = dateTimeFormat.ShortestDayNames;
+        DayHeaders = Enumerable.Range(0, 7)
+            .Select(i => names[(((int)dateTimeFormat.FirstDayOfWeek) + i) % 7])
+            .ToList();
+
         CloseEntryCommand = new RelayCommand(_ => SelectedEntry = null);
+        SelectDateCommand = new RelayCommand(p =>
+        {
+            if (p is DateTime date)
+                SelectedDate = date.Date;
+        });
 
         var today = DateTime.Today;
         Entries.Add(new DiaryEntry { Date = today.AddHours(9), Title = "Morning run", Content = "5 km along the river." });
@@ -47,6 +65,35 @@ public class MainViewModel : ViewModelBase
         Entries.Add(new DiaryEntry { Date = today.AddDays(-1).AddHours(15), Title = "Project sync notes", Content = "Discussed roadmap for Q4." });
         Entries.Add(new DiaryEntry { Date = today.AddDays(-1).SetTime(21, 0), Title = "Dinner with family", Content = "Great evening." });
         Entries.Add(new DiaryEntry { Date = today.AddDays(-2).AddHours(12), Title = "Book: Atomic Habits", Content = "Finished chapter 4." });
+
+        ReloadMonth();
+    }
+
+    private void ReloadMonth()
+    {
+        Days.Clear();
+
+        var firstDayOfWeek = DateTimeFormatInfo.CurrentInfo.FirstDayOfWeek;
+        var offset = ((int)_displayedMonth.DayOfWeek - (int)firstDayOfWeek + 7) % 7;
+        var start = _displayedMonth.AddDays(-offset);
+
+        var counts = Entries
+            .GroupBy(e => e.Date.Date)
+            .ToDictionary(g => g.Key, g => g.Count());
+
+        for (var i = 0; i < 42; i++)
+        {
+            var date = start.AddDays(i);
+            Days.Add(new DayCell
+            {
+                Date = date,
+                IsCurrentMonth = date.Month == _displayedMonth.Month,
+                IsToday = date.Date == DateTime.Today,
+                NoteCount = counts.TryGetValue(date.Date, out var count) ? count : 0
+            });
+        }
+
+        OnPropertyChanged(nameof(MonthTitle));
     }
 }
 
