@@ -9,6 +9,7 @@
         mc:Ignorable="d"
         Title="DIARY" Height="600" Width="1000"
         ResizeMode="NoResize"
+        FontSize="13"
         Background="{DynamicResource Window.Background}">
 
     <Window.Resources>
@@ -26,9 +27,9 @@
         </CollectionViewSource>
     </Window.Resources>
 
-    <Grid Margin="12" TextElement.Foreground="{DynamicResource Text}">
+    <Grid Margin="16" TextElement.Foreground="{DynamicResource Text}">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="250"/>
+            <ColumnDefinition Width="260"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
@@ -38,77 +39,78 @@
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
-            <ListBox Grid.Row="0"
-                     Background="{DynamicResource Window.Background}"
-                     Foreground="{DynamicResource Text}"
-                     ItemsSource="{Binding Source={StaticResource EntriesView}}"
-                     SelectedItem="{Binding SelectedEntry}"
-                     ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                     ScrollViewer.VerticalScrollBarVisibility="Auto">
-            <ListBox.ItemContainerStyle>
-                <Style TargetType="ListBoxItem">
-                    <Setter Property="Foreground" Value="{DynamicResource Text}"/>
-                </Style>
-            </ListBox.ItemContainerStyle>
-            <ListBox.GroupStyle>
-                <GroupStyle>
-                    <GroupStyle.HeaderTemplate>
+            <Border Grid.Row="0"
+                    Background="{DynamicResource Surface}"
+                    CornerRadius="12"
+                    Padding="6"
+                    Margin="0,0,0,10">
+                <ListBox Background="Transparent"
+                         BorderThickness="0"
+                         Foreground="{DynamicResource Text}"
+                         ItemsSource="{Binding Source={StaticResource EntriesView}}"
+                         SelectedItem="{Binding SelectedEntry}"
+                         ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                         ScrollViewer.VerticalScrollBarVisibility="Auto">
+                    <ListBox.GroupStyle>
+                        <GroupStyle>
+                            <GroupStyle.HeaderTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Name, StringFormat='{}{0:dddd, MMMM d}'}"
+                                               FontSize="12"
+                                               FontWeight="SemiBold"
+                                               Foreground="{DynamicResource TextSecondary}"
+                                               Margin="8,14,0,6"/>
+                                </DataTemplate>
+                            </GroupStyle.HeaderTemplate>
+                        </GroupStyle>
+                    </ListBox.GroupStyle>
+                    <ListBox.ItemTemplate>
                         <DataTemplate>
-                            <TextBlock Text="{Binding Name, StringFormat='{}{0:dddd, MMMM d}'}"
-                                       FontWeight="Bold"
-                                       Foreground="{DynamicResource Accent}"
-                                       Margin="0,10,0,4"/>
+                            <StackPanel Margin="0,1">
+                                <TextBlock Text="{Binding Title}"
+                                           FontSize="14"
+                                           FontWeight="SemiBold"
+                                           TextTrimming="CharacterEllipsis"/>
+                                <TextBlock Text="{Binding Date, StringFormat='{}{0:HH:mm}'}"
+                                           FontSize="11"
+                                           Foreground="{DynamicResource TextSecondary}"/>
+                            </StackPanel>
                         </DataTemplate>
-                    </GroupStyle.HeaderTemplate>
-                </GroupStyle>
-            </ListBox.GroupStyle>
-            <ListBox.ItemTemplate>
-                <DataTemplate>
-                    <StackPanel Margin="2,3">
-                        <TextBlock Text="{Binding Title}"
-                                   FontWeight="SemiBold"
-                                   TextTrimming="CharacterEllipsis"/>
-                        <TextBlock Text="{Binding Date, StringFormat='{}{0:HH:mm}'}"
-                                   FontSize="11"
-                                   Foreground="{DynamicResource TextSecondary}"/>
-                    </StackPanel>
-                </DataTemplate>
-            </ListBox.ItemTemplate>
-        </ListBox>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </Border>
 
-        <Border Grid.Row="1"
-                BorderBrush="{DynamicResource Border}"
-                BorderThickness="0,1,0,0"
-                Padding="4,2">
-            <StackPanel Orientation="Horizontal">
-                <Button Content="&#x2B;"
-                        Command="{Binding AddEntryCommand}"
-                        Background="Transparent"
-                        BorderThickness="0"
-                        FontSize="18"
-                        Foreground="{DynamicResource TextSecondary}"
-                        Cursor="Hand"
-                        ToolTip="Add note"/>
-                <Button Content="&#x2699;"
-                        Command="{Binding OpenSettingsCommand}"
-                        Margin="8,0,0,0"
-                        Background="Transparent"
-                        BorderThickness="0"
-                        FontSize="18"
-                        Foreground="{DynamicResource TextSecondary}"
-                        Cursor="Hand"
-                        ToolTip="Settings"/>
-            </StackPanel>
-        </Border>
-    </Grid>
+            <Border Grid.Row="1"
+                    Background="{DynamicResource Surface}"
+                    CornerRadius="12"
+                    Padding="10,4">
+                <StackPanel Orientation="Horizontal">
+                    <Button Content="&#x2B;"
+                            Command="{Binding AddEntryCommand}"
+                            Background="Transparent"
+                            BorderThickness="0"
+                            FontSize="26"
+                            Foreground="{DynamicResource TextSecondary}"
+                            ToolTip="Add note"/>
+                    <Button Content="&#x2699;"
+                            Command="{Binding OpenSettingsCommand}"
+                            Margin="10,0,0,0"
+                            Background="Transparent"
+                            BorderThickness="0"
+                            FontSize="26"
+                            Foreground="{DynamicResource TextSecondary}"
+                            ToolTip="Settings"/>
+                </StackPanel>
+            </Border>
+        </Grid>
 
-        <Grid Grid.Column="1" Margin="16,0,0,0">
+        <Grid Grid.Column="1" Margin="10,0,0,0">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
-            <Grid Grid.Row="0" Margin="0,0,0,8">
+            <Grid Grid.Row="0" Margin="0,0,0,10">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
@@ -116,28 +118,26 @@
 
                 <TextBox Grid.Column="0"
                          Text="{Binding SelectedEntry.Title, UpdateSourceTrigger=PropertyChanged}"
-                         FontSize="20"
+                         FontSize="21"
                          FontWeight="SemiBold"
                          Background="Transparent"
                          BorderThickness="1"
                          BorderBrush="{DynamicResource Border}"
-                         CaretBrush="{DynamicResource Text}"
-                         Foreground="{DynamicResource Text}"
-                         Padding="2"
+                         Padding="10,8"
                          TextWrapping="Wrap"
                          AcceptsReturn="False"
                          VerticalAlignment="Center"
+                         VerticalContentAlignment="Center"
                          Visibility="{Binding HasSelection, Converter={StaticResource BoolToVis}}"/>
 
                 <Button Grid.Column="1"
                         Content="&#x2715;"
-                        Margin="8,0,0,0"
+                        Margin="10,0,0,0"
+                        Padding="8,4"
                         VerticalAlignment="Top"
-                        Background="Transparent"
                         BorderThickness="0"
-                        FontSize="16"
+                        FontSize="14"
                         Foreground="{DynamicResource TextSecondary}"
-                        Cursor="Hand"
                         ToolTip="Close entry"
                         Command="{Binding CloseEntryCommand}"
                         Visibility="{Binding HasSelection, Converter={StaticResource BoolToVis}}"/>
@@ -156,18 +156,18 @@
                 </Grid.RowDefinitions>
 
                 <Grid Grid.Row="0"
-                              Grid.RowSpan="3"
-                              Grid.Column="0"
-                              Grid.ColumnSpan="3"
-                              Visibility="{Binding HasSelection, Converter={StaticResource BoolToVis}}">
+                      Grid.RowSpan="3"
+                      Grid.Column="0"
+                      Grid.ColumnSpan="3"
+                      Visibility="{Binding HasSelection, Converter={StaticResource BoolToVis}}">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
 
-                    <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,4,8,12">
-                        <Border CornerRadius="10"
-                                Padding="10,3"
+                    <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="2,2,8,12">
+                        <Border CornerRadius="12"
+                                Padding="12,6"
                                 Margin="0,0,8,0"
                                 Background="{DynamicResource Panel.Background}"
                                 BorderBrush="{DynamicResource Border}"
@@ -186,12 +186,10 @@
                              TextWrapping="Wrap"
                              AcceptsReturn="True"
                              VerticalScrollBarVisibility="Auto"
+                             Padding="10,8"
+                             VerticalContentAlignment="Top"
                              Background="Transparent"
-                             BorderThickness="1"
-                             BorderBrush="{DynamicResource Border}"
-                             CaretBrush="{DynamicResource Text}"
-                             Foreground="{DynamicResource Text}"
-                             Padding="2"/>
+                             BorderBrush="{DynamicResource Border}"/>
                 </Grid>
 
                 <Grid Grid.Row="1"
@@ -205,11 +203,12 @@
 
                     <TextBlock Grid.Row="0"
                                Text="{Binding MonthTitle}"
-                               FontWeight="Bold"
+                               FontWeight="SemiBold"
                                FontSize="16"
                                HorizontalAlignment="Center"
                                VerticalAlignment="Center"
-                               Margin="0,0,0,8"/>
+                               Foreground="{DynamicResource Text}"
+                               Margin="0,0,0,10"/>
 
                     <ItemsControl Grid.Row="1"
                                   ItemsSource="{Binding DayHeaders}">
@@ -223,8 +222,9 @@
                                 <TextBlock Text="{Binding}"
                                            HorizontalAlignment="Center"
                                            FontWeight="SemiBold"
+                                           FontSize="11"
                                            Foreground="{DynamicResource TextSecondary}"
-                                           Padding="0,4"/>
+                                           Padding="0,6"/>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
@@ -240,9 +240,9 @@
                             <DataTemplate>
                                 <Button Command="{Binding DataContext.SelectDateCommand, RelativeSource={RelativeSource AncestorType=Window}}"
                                         CommandParameter="{Binding Date}"
-                                        Margin="1">
+                                        Margin="3">
                                     <Button.Style>
-                                        <Style TargetType="Button">
+                                        <Style TargetType="Button" BasedOn="{StaticResource RoundButton}">
                                             <Setter Property="Background" Value="{Binding NoteCount, Converter={StaticResource CountToBrush}}"/>
                                             <Setter Property="BorderBrush" Value="{DynamicResource DayBorder}"/>
                                             <Setter Property="BorderThickness" Value="0.5"/>
