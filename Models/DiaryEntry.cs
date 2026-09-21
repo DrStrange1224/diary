@@ -12,7 +12,7 @@ public class DiaryEntry : INotifyPropertyChanged
 
     public Guid Id { get; set; } = Guid.NewGuid();
     public DateTime Date { get; set; } = DateTime.Now;
-    public DateTime CreatedAt { get; } = DateTime.Now;
+    public DateTime CreatedAt { get; set; } = DateTime.Now;
 
     public string Title
     {

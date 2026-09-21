@@ -1,9 +1,11 @@
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Globalization;
 using System.Windows;
 using System.Windows.Input;
 using Diary.Commands;
 using Diary.Models;
+using Diary.Services;
 using Diary.Themes;
 
 namespace Diary.ViewModels;
@@ -68,19 +70,48 @@ public class MainViewModel : ViewModelBase
         AddEntryCommand = new RelayCommand(_ =>
         {
             var entry = new DiaryEntry { Date = DateTime.Now, Title = "New Note", Content = "Write here..." };
+            entry.PropertyChanged += OnEntryPropertyChanged;
             Entries.Add(entry);
+            NoteStore.Save(entry);
             SelectedDate = entry.Date.Date;
             SelectedEntry = entry;
             RefreshDays();
         });
 
-        Entries.Add(new DiaryEntry { Date = new DateTime(2026, 9, 21, 9, 0, 0), Title = "Morning run", Content = "5 km along the river." });
-        Entries.Add(new DiaryEntry { Date = new DateTime(2026, 9, 21, 18, 30, 0), Title = "Grocery list", Content = "Milk, bread, eggs." });
-        Entries.Add(new DiaryEntry { Date = new DateTime(2026, 9, 20, 15, 0, 0), Title = "Project sync notes", Content = "Discussed roadmap for Q4." });
-        Entries.Add(new DiaryEntry { Date = new DateTime(2026, 9, 20, 21, 0, 0), Title = "Dinner with family", Content = "Great evening." });
-        Entries.Add(new DiaryEntry { Date = new DateTime(2026, 9, 19, 12, 0, 0), Title = "Book: Atomic Habits", Content = "Finished chapter 4." });
+        NoteStore.Initialize();
+        var saved = NoteStore.LoadAll();
+        if (saved.Count == 0)
+        {
+            saved = CreateSeedEntries();
+            foreach (var entry in saved)
+                NoteStore.Save(entry);
+        }
+
+        foreach (var entry in saved)
+        {
+            entry.PropertyChanged += OnEntryPropertyChanged;
+            Entries.Add(entry);
+        }
 
         ReloadMonth();
+    }
+
+    private static List<DiaryEntry> CreateSeedEntries() => new()
+    {
+        new DiaryEntry { Date = new DateTime(2026, 9, 21, 9, 0, 0), Title = "Morning run", Content = "5 km along the river." },
+        new DiaryEntry { Date = new DateTime(2026, 9, 21, 18, 30, 0), Title = "Grocery list", Content = "Milk, bread, eggs." },
+        new DiaryEntry { Date = new DateTime(2026, 9, 20, 15, 0, 0), Title = "Project sync notes", Content = "Discussed roadmap for Q4." },
+        new DiaryEntry { Date = new DateTime(2026, 9, 20, 21, 0, 0), Title = "Dinner with family", Content = "Great evening." },
+        new DiaryEntry { Date = new DateTime(2026, 9, 19, 12, 0, 0), Title = "Book: Atomic Habits", Content = "Finished chapter 4." }
+    };
+
+    private void OnEntryPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (sender is DiaryEntry entry &&
+            (e.PropertyName == nameof(DiaryEntry.Title) || e.PropertyName == nameof(DiaryEntry.Content)))
+        {
+            NoteStore.Save(entry);
+        }
     }
 
     private void OnThemeChanged()
