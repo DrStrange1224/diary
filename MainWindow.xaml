@@ -4,11 +4,15 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Diary"
+        xmlns:conv="clr-namespace:Diary.Converters"
         xmlns:scm="clr-namespace:System.ComponentModel;assembly=WindowsBase"
         mc:Ignorable="d"
-        Title="DIARY" Height="600" Width="1000">
+        Title="DIARY" Height="600" Width="1000"
+        ResizeMode="NoResize">
 
     <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+        <conv:InverseBooleanToVisibilityConverter x:Key="InverseBoolToVis"/>
         <CollectionViewSource x:Key="EntriesView" Source="{Binding Entries}">
             <CollectionViewSource.SortDescriptions>
                 <scm:SortDescription PropertyName="Day" Direction="Descending"/>
@@ -26,48 +30,36 @@
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
-        <Grid Grid.Column="0">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
-
-            <TextBlock Text="Entries"
-                       FontSize="20"
-                       FontWeight="SemiBold"
-                       Margin="0,0,0,8"/>
-
-            <ListBox Grid.Row="1"
-                     ItemsSource="{Binding Source={StaticResource EntriesView}}"
-                     SelectedItem="{Binding SelectedEntry}"
-                     ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                     ScrollViewer.VerticalScrollBarVisibility="Auto">
-                <ListBox.GroupStyle>
-                    <GroupStyle>
-                        <GroupStyle.HeaderTemplate>
-                            <DataTemplate>
-                                <TextBlock Text="{Binding Name, StringFormat='{}{0:dddd, MMMM d}'}"
-                                           FontWeight="Bold"
-                                           Foreground="CornflowerBlue"
-                                           Margin="0,10,0,4"/>
-                            </DataTemplate>
-                        </GroupStyle.HeaderTemplate>
-                    </GroupStyle>
-                </ListBox.GroupStyle>
-                <ListBox.ItemTemplate>
-                    <DataTemplate>
-                        <StackPanel Margin="2,3">
-                            <TextBlock Text="{Binding Title}"
-                                       FontWeight="SemiBold"
-                                       TextTrimming="CharacterEllipsis"/>
-                            <TextBlock Text="{Binding Date, StringFormat='{}{0:HH:mm}'}"
-                                       FontSize="11"
-                                       Foreground="Gray"/>
-                        </StackPanel>
-                    </DataTemplate>
-                </ListBox.ItemTemplate>
-            </ListBox>
-        </Grid>
+        <ListBox Grid.Column="0"
+                 ItemsSource="{Binding Source={StaticResource EntriesView}}"
+                 SelectedItem="{Binding SelectedEntry}"
+                 ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                 ScrollViewer.VerticalScrollBarVisibility="Auto">
+            <ListBox.GroupStyle>
+                <GroupStyle>
+                    <GroupStyle.HeaderTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Name, StringFormat='{}{0:dddd, MMMM d}'}"
+                                       FontWeight="Bold"
+                                       Foreground="CornflowerBlue"
+                                       Margin="0,10,0,4"/>
+                        </DataTemplate>
+                    </GroupStyle.HeaderTemplate>
+                </GroupStyle>
+            </ListBox.GroupStyle>
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel Margin="2,3">
+                        <TextBlock Text="{Binding Title}"
+                                   FontWeight="SemiBold"
+                                   TextTrimming="CharacterEllipsis"/>
+                        <TextBlock Text="{Binding Date, StringFormat='{}{0:HH:mm}'}"
+                                   FontSize="11"
+                                   Foreground="Gray"/>
+                    </StackPanel>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
 
         <Grid Grid.Column="1" Margin="16,0,0,0">
             <Grid.RowDefinitions>
@@ -75,16 +67,63 @@
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
-            <TextBlock Text="Calendar"
-                       FontSize="20"
-                       FontWeight="SemiBold"
-                       Margin="0,0,0,8"/>
+            <Grid Grid.Row="0" Margin="0,0,0,8">
+                <TextBlock Text="{Binding RightHeader}"
+                           FontSize="20"
+                           FontWeight="SemiBold"
+                           TextTrimming="CharacterEllipsis"
+                           VerticalAlignment="Center"
+                           Visibility="{Binding HasSelection, Converter={StaticResource BoolToVis}}"/>
 
-            <Calendar Grid.Row="1"
-                      SelectedDate="{Binding SelectedDate}"
-                      FontSize="18"
-                      HorizontalAlignment="Center"
-                      VerticalAlignment="Center"/>
+                <Button Content="&#x2715;"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Center"
+                        Background="Transparent"
+                        BorderThickness="0"
+                        FontSize="16"
+                        Foreground="Gray"
+                        Cursor="Hand"
+                        ToolTip="Close entry"
+                        Command="{Binding CloseEntryCommand}"
+                        Visibility="{Binding HasSelection, Converter={StaticResource BoolToVis}}"/>
+            </Grid>
+
+            <Grid Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="15*"/>
+                    <ColumnDefinition Width="70*"/>
+                    <ColumnDefinition Width="15*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="15*"/>
+                    <RowDefinition Height="70*"/>
+                    <RowDefinition Height="15*"/>
+                </Grid.RowDefinitions>
+
+                <ScrollViewer Grid.Row="0"
+                              Grid.RowSpan="3"
+                              Grid.Column="0"
+                              Grid.ColumnSpan="3"
+                              VerticalScrollBarVisibility="Auto"
+                              Visibility="{Binding HasSelection, Converter={StaticResource BoolToVis}}">
+                    <StackPanel Margin="0,4,8,0">
+                        <TextBlock Text="{Binding SelectedEntry.Date, StringFormat='{}{0:dddd, MMMM d, HH:mm}'}"
+                                   FontSize="14"
+                                   Foreground="Gray"
+                                   Margin="0,0,0,10"/>
+                        <TextBlock Text="{Binding SelectedEntry.Content}"
+                                   FontSize="15"
+                                   TextWrapping="Wrap"/>
+                    </StackPanel>
+                </ScrollViewer>
+
+                <Viewbox Grid.Row="1"
+                         Grid.Column="1"
+                         Stretch="Uniform"
+                         Visibility="{Binding HasSelection, Converter={StaticResource InverseBoolToVis}}">
+                    <Calendar SelectedDate="{Binding SelectedDate}"/>
+                </Viewbox>
+            </Grid>
         </Grid>
     </Grid>
 </Window>

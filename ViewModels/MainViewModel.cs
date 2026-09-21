@@ -1,4 +1,6 @@
 using System.Collections.ObjectModel;
+using System.Windows.Input;
+using Diary.Commands;
 using Diary.Models;
 
 namespace Diary.ViewModels;
@@ -13,8 +15,19 @@ public class MainViewModel : ViewModelBase
     public DiaryEntry? SelectedEntry
     {
         get => _selectedEntry;
-        set => SetProperty(ref _selectedEntry, value);
+        set
+        {
+            if (SetProperty(ref _selectedEntry, value))
+            {
+                OnPropertyChanged(nameof(HasSelection));
+                OnPropertyChanged(nameof(RightHeader));
+            }
+        }
     }
+
+    public bool HasSelection => SelectedEntry is not null;
+
+    public string RightHeader => SelectedEntry?.Title ?? string.Empty;
 
     public DateTime SelectedDate
     {
@@ -22,8 +35,12 @@ public class MainViewModel : ViewModelBase
         set => SetProperty(ref _selectedDate, value);
     }
 
+    public ICommand CloseEntryCommand { get; }
+
     public MainViewModel()
     {
+        CloseEntryCommand = new RelayCommand(_ => SelectedEntry = null);
+
         var today = DateTime.Today;
         Entries.Add(new DiaryEntry { Date = today.AddHours(9), Title = "Morning run", Content = "5 km along the river." });
         Entries.Add(new DiaryEntry { Date = today.SetTime(18, 30), Title = "Grocery list", Content = "Milk, bread, eggs." });
