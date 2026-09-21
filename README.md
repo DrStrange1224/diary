@@ -1,5 +1,7 @@
 # DIARY
 
+WARNING: too much vibecoded, human reviewing in process
+
 A lightweight, modern desktop diary application for Windows, built with WPF (.NET).
 
 Write daily notes, browse them grouped by day, and get an instant overview of your activity
