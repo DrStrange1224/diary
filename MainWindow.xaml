@@ -80,15 +80,25 @@
                 BorderBrush="{DynamicResource Border}"
                 BorderThickness="0,1,0,0"
                 Padding="4,2">
-            <Button Content="&#x2699;"
-                    Command="{Binding OpenSettingsCommand}"
-                    HorizontalAlignment="Left"
-                    Background="Transparent"
-                    BorderThickness="0"
-                    FontSize="18"
-                    Foreground="{DynamicResource TextSecondary}"
-                    Cursor="Hand"
-                    ToolTip="Settings"/>
+            <StackPanel Orientation="Horizontal">
+                <Button Content="&#x2B;"
+                        Command="{Binding AddEntryCommand}"
+                        Background="Transparent"
+                        BorderThickness="0"
+                        FontSize="18"
+                        Foreground="{DynamicResource TextSecondary}"
+                        Cursor="Hand"
+                        ToolTip="Add note"/>
+                <Button Content="&#x2699;"
+                        Command="{Binding OpenSettingsCommand}"
+                        Margin="8,0,0,0"
+                        Background="Transparent"
+                        BorderThickness="0"
+                        FontSize="18"
+                        Foreground="{DynamicResource TextSecondary}"
+                        Cursor="Hand"
+                        ToolTip="Settings"/>
+            </StackPanel>
         </Border>
     </Grid>
 
@@ -99,16 +109,30 @@
             </Grid.RowDefinitions>
 
             <Grid Grid.Row="0" Margin="0,0,0,8">
-                <TextBlock Text="{Binding RightHeader}"
-                           FontSize="20"
-                           FontWeight="SemiBold"
-                           TextTrimming="CharacterEllipsis"
-                           VerticalAlignment="Center"
-                           Visibility="{Binding HasSelection, Converter={StaticResource BoolToVis}}"/>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
 
-                <Button Content="&#x2715;"
-                        HorizontalAlignment="Right"
-                        VerticalAlignment="Center"
+                <TextBox Grid.Column="0"
+                         Text="{Binding SelectedEntry.Title, UpdateSourceTrigger=PropertyChanged}"
+                         FontSize="20"
+                         FontWeight="SemiBold"
+                         Background="Transparent"
+                         BorderThickness="1"
+                         BorderBrush="{DynamicResource Border}"
+                         CaretBrush="{DynamicResource Text}"
+                         Foreground="{DynamicResource Text}"
+                         Padding="2"
+                         TextWrapping="Wrap"
+                         AcceptsReturn="False"
+                         VerticalAlignment="Center"
+                         Visibility="{Binding HasSelection, Converter={StaticResource BoolToVis}}"/>
+
+                <Button Grid.Column="1"
+                        Content="&#x2715;"
+                        Margin="8,0,0,0"
+                        VerticalAlignment="Top"
                         Background="Transparent"
                         BorderThickness="0"
                         FontSize="16"
@@ -131,22 +155,44 @@
                     <RowDefinition Height="15*"/>
                 </Grid.RowDefinitions>
 
-                <ScrollViewer Grid.Row="0"
+                <Grid Grid.Row="0"
                               Grid.RowSpan="3"
                               Grid.Column="0"
                               Grid.ColumnSpan="3"
-                              VerticalScrollBarVisibility="Auto"
                               Visibility="{Binding HasSelection, Converter={StaticResource BoolToVis}}">
-                    <StackPanel Margin="0,4,8,0">
-                        <TextBlock Text="{Binding SelectedEntry.Date, StringFormat='{}{0:dddd, MMMM d, HH:mm}'}"
-                                   FontSize="14"
-                                   Foreground="{DynamicResource TextSecondary}"
-                                   Margin="0,0,0,10"/>
-                        <TextBlock Text="{Binding SelectedEntry.Content}"
-                                   FontSize="15"
-                                   TextWrapping="Wrap"/>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,4,8,12">
+                        <Border CornerRadius="10"
+                                Padding="10,3"
+                                Margin="0,0,8,0"
+                                Background="{DynamicResource Panel.Background}"
+                                BorderBrush="{DynamicResource Border}"
+                                BorderThickness="1">
+                            <TextBlock FontSize="12"
+                                       Foreground="{DynamicResource TextSecondary}">
+                                <Run Text="Created: "/>
+                                <Run Text="{Binding SelectedEntry.CreatedAt, Mode=OneWay, StringFormat='{}{0:dd MMM yyyy, HH:mm}'}"/>
+                            </TextBlock>
+                        </Border>
                     </StackPanel>
-                </ScrollViewer>
+
+                    <TextBox Grid.Row="1"
+                             Text="{Binding SelectedEntry.Content, UpdateSourceTrigger=PropertyChanged}"
+                             FontSize="15"
+                             TextWrapping="Wrap"
+                             AcceptsReturn="True"
+                             VerticalScrollBarVisibility="Auto"
+                             Background="Transparent"
+                             BorderThickness="1"
+                             BorderBrush="{DynamicResource Border}"
+                             CaretBrush="{DynamicResource Text}"
+                             Foreground="{DynamicResource Text}"
+                             Padding="2"/>
+                </Grid>
 
                 <Grid Grid.Row="1"
                      Grid.Column="1"

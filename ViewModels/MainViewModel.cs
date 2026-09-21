@@ -26,14 +26,11 @@ public class MainViewModel : ViewModelBase
             if (SetProperty(ref _selectedEntry, value))
             {
                 OnPropertyChanged(nameof(HasSelection));
-                OnPropertyChanged(nameof(RightHeader));
             }
         }
     }
 
     public bool HasSelection => SelectedEntry is not null;
-
-    public string RightHeader => SelectedEntry?.Title ?? string.Empty;
 
     public DateTime SelectedDate
     {
@@ -46,6 +43,7 @@ public class MainViewModel : ViewModelBase
     public ICommand CloseEntryCommand { get; }
     public ICommand SelectDateCommand { get; }
     public ICommand OpenSettingsCommand { get; }
+    public ICommand AddEntryCommand { get; }
 
     public MainViewModel()
     {
@@ -67,18 +65,30 @@ public class MainViewModel : ViewModelBase
             if (p is DateTime date)
                 SelectedDate = date.Date;
         });
+        AddEntryCommand = new RelayCommand(_ =>
+        {
+            var entry = new DiaryEntry { Date = DateTime.Now, Title = "New Note", Content = "Write here..." };
+            Entries.Add(entry);
+            SelectedDate = entry.Date.Date;
+            SelectedEntry = entry;
+            RefreshDays();
+        });
 
-        var today = DateTime.Today;
-        Entries.Add(new DiaryEntry { Date = today.AddHours(9), Title = "Morning run", Content = "5 km along the river." });
-        Entries.Add(new DiaryEntry { Date = today.SetTime(18, 30), Title = "Grocery list", Content = "Milk, bread, eggs." });
-        Entries.Add(new DiaryEntry { Date = today.AddDays(-1).AddHours(15), Title = "Project sync notes", Content = "Discussed roadmap for Q4." });
-        Entries.Add(new DiaryEntry { Date = today.AddDays(-1).SetTime(21, 0), Title = "Dinner with family", Content = "Great evening." });
-        Entries.Add(new DiaryEntry { Date = today.AddDays(-2).AddHours(12), Title = "Book: Atomic Habits", Content = "Finished chapter 4." });
+        Entries.Add(new DiaryEntry { Date = new DateTime(2026, 9, 21, 9, 0, 0), Title = "Morning run", Content = "5 km along the river." });
+        Entries.Add(new DiaryEntry { Date = new DateTime(2026, 9, 21, 18, 30, 0), Title = "Grocery list", Content = "Milk, bread, eggs." });
+        Entries.Add(new DiaryEntry { Date = new DateTime(2026, 9, 20, 15, 0, 0), Title = "Project sync notes", Content = "Discussed roadmap for Q4." });
+        Entries.Add(new DiaryEntry { Date = new DateTime(2026, 9, 20, 21, 0, 0), Title = "Dinner with family", Content = "Great evening." });
+        Entries.Add(new DiaryEntry { Date = new DateTime(2026, 9, 19, 12, 0, 0), Title = "Book: Atomic Habits", Content = "Finished chapter 4." });
 
         ReloadMonth();
     }
 
     private void OnThemeChanged()
+    {
+        RefreshDays();
+    }
+
+    private void RefreshDays()
     {
         var cells = Days.ToList();
         Days.Clear();
@@ -112,10 +122,4 @@ public class MainViewModel : ViewModelBase
 
         OnPropertyChanged(nameof(MonthTitle));
     }
-}
-
-internal static class DateTimeExtensions
-{
-    public static DateTime SetTime(this DateTime date, int hour, int minute)
-        => date.Date.Add(new TimeSpan(hour, minute, 0));
 }
