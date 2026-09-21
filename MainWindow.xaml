@@ -8,7 +8,8 @@
         xmlns:scm="clr-namespace:System.ComponentModel;assembly=WindowsBase"
         mc:Ignorable="d"
         Title="DIARY" Height="600" Width="1000"
-        ResizeMode="NoResize">
+        ResizeMode="NoResize"
+        Background="{DynamicResource Window.Background}">
 
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis"/>
@@ -25,24 +26,37 @@
         </CollectionViewSource>
     </Window.Resources>
 
-    <Grid Margin="12">
+    <Grid Margin="12" TextElement.Foreground="{DynamicResource Text}">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="250"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
-        <ListBox Grid.Column="0"
-                 ItemsSource="{Binding Source={StaticResource EntriesView}}"
-                 SelectedItem="{Binding SelectedEntry}"
-                 ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                 ScrollViewer.VerticalScrollBarVisibility="Auto">
+        <Grid Grid.Column="0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <ListBox Grid.Row="0"
+                     Background="{DynamicResource Window.Background}"
+                     Foreground="{DynamicResource Text}"
+                     ItemsSource="{Binding Source={StaticResource EntriesView}}"
+                     SelectedItem="{Binding SelectedEntry}"
+                     ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                     ScrollViewer.VerticalScrollBarVisibility="Auto">
+            <ListBox.ItemContainerStyle>
+                <Style TargetType="ListBoxItem">
+                    <Setter Property="Foreground" Value="{DynamicResource Text}"/>
+                </Style>
+            </ListBox.ItemContainerStyle>
             <ListBox.GroupStyle>
                 <GroupStyle>
                     <GroupStyle.HeaderTemplate>
                         <DataTemplate>
                             <TextBlock Text="{Binding Name, StringFormat='{}{0:dddd, MMMM d}'}"
                                        FontWeight="Bold"
-                                       Foreground="CornflowerBlue"
+                                       Foreground="{DynamicResource Accent}"
                                        Margin="0,10,0,4"/>
                         </DataTemplate>
                     </GroupStyle.HeaderTemplate>
@@ -56,11 +70,27 @@
                                    TextTrimming="CharacterEllipsis"/>
                         <TextBlock Text="{Binding Date, StringFormat='{}{0:HH:mm}'}"
                                    FontSize="11"
-                                   Foreground="Gray"/>
+                                   Foreground="{DynamicResource TextSecondary}"/>
                     </StackPanel>
                 </DataTemplate>
             </ListBox.ItemTemplate>
         </ListBox>
+
+        <Border Grid.Row="1"
+                BorderBrush="{DynamicResource Border}"
+                BorderThickness="0,1,0,0"
+                Padding="4,2">
+            <Button Content="&#x2699;"
+                    Command="{Binding OpenSettingsCommand}"
+                    HorizontalAlignment="Left"
+                    Background="Transparent"
+                    BorderThickness="0"
+                    FontSize="18"
+                    Foreground="{DynamicResource TextSecondary}"
+                    Cursor="Hand"
+                    ToolTip="Settings"/>
+        </Border>
+    </Grid>
 
         <Grid Grid.Column="1" Margin="16,0,0,0">
             <Grid.RowDefinitions>
@@ -82,7 +112,7 @@
                         Background="Transparent"
                         BorderThickness="0"
                         FontSize="16"
-                        Foreground="Gray"
+                        Foreground="{DynamicResource TextSecondary}"
                         Cursor="Hand"
                         ToolTip="Close entry"
                         Command="{Binding CloseEntryCommand}"
@@ -110,7 +140,7 @@
                     <StackPanel Margin="0,4,8,0">
                         <TextBlock Text="{Binding SelectedEntry.Date, StringFormat='{}{0:dddd, MMMM d, HH:mm}'}"
                                    FontSize="14"
-                                   Foreground="Gray"
+                                   Foreground="{DynamicResource TextSecondary}"
                                    Margin="0,0,0,10"/>
                         <TextBlock Text="{Binding SelectedEntry.Content}"
                                    FontSize="15"
@@ -147,7 +177,7 @@
                                 <TextBlock Text="{Binding}"
                                            HorizontalAlignment="Center"
                                            FontWeight="SemiBold"
-                                           Foreground="Gray"
+                                           Foreground="{DynamicResource TextSecondary}"
                                            Padding="0,4"/>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
@@ -168,11 +198,11 @@
                                     <Button.Style>
                                         <Style TargetType="Button">
                                             <Setter Property="Background" Value="{Binding NoteCount, Converter={StaticResource CountToBrush}}"/>
-                                            <Setter Property="BorderBrush" Value="LightGray"/>
+                                            <Setter Property="BorderBrush" Value="{DynamicResource DayBorder}"/>
                                             <Setter Property="BorderThickness" Value="0.5"/>
                                             <Style.Triggers>
                                                 <DataTrigger Binding="{Binding IsToday}" Value="True">
-                                                    <Setter Property="Background" Value="CornflowerBlue"/>
+                                                    <Setter Property="Background" Value="{DynamicResource Today}"/>
                                                 </DataTrigger>
                                             </Style.Triggers>
                                         </Style>
@@ -183,10 +213,10 @@
                                                FontSize="14">
                                         <TextBlock.Style>
                                             <Style TargetType="TextBlock">
-                                                <Setter Property="Foreground" Value="DarkGray"/>
+                                                <Setter Property="Foreground" Value="{DynamicResource TextSecondary}"/>
                                                 <Style.Triggers>
                                                     <DataTrigger Binding="{Binding IsCurrentMonth}" Value="True">
-                                                        <Setter Property="Foreground" Value="Black"/>
+                                                        <Setter Property="Foreground" Value="{DynamicResource Text}"/>
                                                     </DataTrigger>
                                                     <DataTrigger Binding="{Binding IsToday}" Value="True">
                                                         <Setter Property="Foreground" Value="White"/>

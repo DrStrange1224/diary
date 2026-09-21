@@ -1,8 +1,10 @@
 using System.Collections.ObjectModel;
 using System.Globalization;
+using System.Windows;
 using System.Windows.Input;
 using Diary.Commands;
 using Diary.Models;
+using Diary.Themes;
 
 namespace Diary.ViewModels;
 
@@ -43,9 +45,11 @@ public class MainViewModel : ViewModelBase
 
     public ICommand CloseEntryCommand { get; }
     public ICommand SelectDateCommand { get; }
+    public ICommand OpenSettingsCommand { get; }
 
     public MainViewModel()
     {
+        ThemeManager.ThemeChanged += OnThemeChanged;
         var dateTimeFormat = DateTimeFormatInfo.CurrentInfo;
         var names = dateTimeFormat.ShortestDayNames;
         DayHeaders = Enumerable.Range(0, 7)
@@ -53,6 +57,11 @@ public class MainViewModel : ViewModelBase
             .ToList();
 
         CloseEntryCommand = new RelayCommand(_ => SelectedEntry = null);
+        OpenSettingsCommand = new RelayCommand(_ =>
+        {
+            var window = new SettingsWindow { Owner = Application.Current.MainWindow };
+            window.ShowDialog();
+        });
         SelectDateCommand = new RelayCommand(p =>
         {
             if (p is DateTime date)
@@ -67,6 +76,14 @@ public class MainViewModel : ViewModelBase
         Entries.Add(new DiaryEntry { Date = today.AddDays(-2).AddHours(12), Title = "Book: Atomic Habits", Content = "Finished chapter 4." });
 
         ReloadMonth();
+    }
+
+    private void OnThemeChanged()
+    {
+        var cells = Days.ToList();
+        Days.Clear();
+        foreach (var cell in cells)
+            Days.Add(cell);
     }
 
     private void ReloadMonth()
