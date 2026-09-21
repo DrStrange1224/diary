@@ -16,8 +16,17 @@ public partial class App : Application
         base.OnStartup(e);
 
         var settings = AppSettingsService.Load();
+        Localizer.SetLanguage(settings.Language);
         ThemeManager.Apply(settings.AppTheme);
-        ThemeManager.ThemeChanged += () =>
-            AppSettingsService.Save(new AppSettings { AppTheme = ThemeManager.Current });
+
+        Localizer.Changed += SaveSettings;
+        ThemeManager.ThemeChanged += SaveSettings;
     }
+
+    private static void SaveSettings() =>
+        AppSettingsService.Save(new AppSettings
+        {
+            AppTheme = ThemeManager.Current,
+            Language = Localizer.Current
+        });
 }

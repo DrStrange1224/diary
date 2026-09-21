@@ -1,5 +1,6 @@
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using Diary.Services;
 
 namespace Diary.Models;
 
@@ -37,6 +38,22 @@ public class DiaryEntry : INotifyPropertyChanged
     }
 
     public DateTime Day => Date.Date;
+    public string DayLabel
+    {
+        get
+        {
+            var formatted = Date.ToString("dddd, MMMM d", Localizer.Culture);
+            return char.ToUpperInvariant(formatted[0]) + formatted.Substring(1);
+        }
+    }
+    public string CreatedLabel =>
+        Localizer.Get("Created") + " " + CreatedAt.ToString("dd MMM yyyy, HH:mm", Localizer.Culture);
+
+    public void RefreshLabels()
+    {
+        OnPropertyChanged(nameof(DayLabel));
+        OnPropertyChanged(nameof(CreatedLabel));
+    }
 
     private void OnPropertyChanged([CallerMemberName] string? propertyName = null)
         => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));

@@ -1,6 +1,5 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Globalization;
 using System.Windows;
 using System.Windows.Input;
 using Diary.Commands;
@@ -18,7 +17,7 @@ public class MainViewModel : ViewModelBase
 
     public ObservableCollection<DiaryEntry> Entries { get; } = new();
     public ObservableCollection<DayCell> Days { get; } = new();
-    public IReadOnlyList<string> DayHeaders { get; }
+    public IReadOnlyList<string> DayHeaders => GetDayHeaders();
 
     public DiaryEntry? SelectedEntry
     {
@@ -40,7 +39,16 @@ public class MainViewModel : ViewModelBase
         set => SetProperty(ref _selectedDate, value);
     }
 
-    public string MonthTitle => _displayedMonth.ToString("MMMM yyyy");
+    public string MonthTitle
+    {
+        get
+        {
+            var title = _displayedMonth.ToString("MMMM yyyy", Localizer.Culture);
+            return char.ToUpperInvariant(title[0]) + title.Substring(1);
+        }
+    }
+
+    public AppStrings Strings => AppStrings.Instance;
 
     public ICommand CloseEntryCommand { get; }
     public ICommand SelectDateCommand { get; }
@@ -50,11 +58,7 @@ public class MainViewModel : ViewModelBase
     public MainViewModel()
     {
         ThemeManager.ThemeChanged += OnThemeChanged;
-        var dateTimeFormat = DateTimeFormatInfo.CurrentInfo;
-        var names = dateTimeFormat.ShortestDayNames;
-        DayHeaders = Enumerable.Range(0, 7)
-            .Select(i => names[(((int)dateTimeFormat.FirstDayOfWeek) + i) % 7])
-            .ToList();
+        Localizer.Changed += OnLanguageChanged;
 
         CloseEntryCommand = new RelayCommand(_ => SelectedEntry = null);
         OpenSettingsCommand = new RelayCommand(_ =>
@@ -69,7 +73,7 @@ public class MainViewModel : ViewModelBase
         });
         AddEntryCommand = new RelayCommand(_ =>
         {
-            var entry = new DiaryEntry { Date = DateTime.Now, Title = "New Note", Content = "Write here..." };
+            var entry = new DiaryEntry { Date = DateTime.Now, Title = Strings.DefaultTitle, Content = Strings.DefaultContent };
             entry.PropertyChanged += OnEntryPropertyChanged;
             Entries.Add(entry);
             NoteStore.Save(entry);
@@ -105,6 +109,11 @@ public class MainViewModel : ViewModelBase
         new DiaryEntry { Date = new DateTime(2026, 9, 19, 12, 0, 0), Title = "Book: Atomic Habits", Content = "Finished chapter 4." }
     };
 
+    private static IReadOnlyList<string> GetDayHeaders() =>
+        Localizer.Current == Language.Russian
+            ? new[] { "П", "В", "С", "Ч", "П", "С", "В" }
+            : new[] { "M", "T", "W", "T", "F", "S", "S" };
+
     private void OnEntryPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
         if (sender is DiaryEntry entry &&
@@ -119,6 +128,15 @@ public class MainViewModel : ViewModelBase
         RefreshDays();
     }
 
+    private void OnLanguageChanged()
+    {
+        foreach (var entry in Entries)
+            entry.RefreshLabels();
+
+        OnPropertyChanged(nameof(DayHeaders));
+        OnPropertyChanged(nameof(MonthTitle));
+    }
+
     private void RefreshDays()
     {
         var cells = Days.ToList();
@@ -131,8 +149,7 @@ public class MainViewModel : ViewModelBase
     {
         Days.Clear();
 
-        var firstDayOfWeek = DateTimeFormatInfo.CurrentInfo.FirstDayOfWeek;
-        var offset = ((int)_displayedMonth.DayOfWeek - (int)firstDayOfWeek + 7) % 7;
+        var offset = ((int)_displayedMonth.DayOfWeek - (int)DayOfWeek.Monday + 7) % 7;
         var start = _displayedMonth.AddDays(-offset);
 
         var counts = Entries

@@ -22,7 +22,7 @@
                 <scm:SortDescription PropertyName="Date" Direction="Descending"/>
             </CollectionViewSource.SortDescriptions>
             <CollectionViewSource.GroupDescriptions>
-                <PropertyGroupDescription PropertyName="Day"/>
+                <PropertyGroupDescription PropertyName="DayLabel"/>
             </CollectionViewSource.GroupDescriptions>
         </CollectionViewSource>
     </Window.Resources>
@@ -55,7 +55,7 @@
                         <GroupStyle>
                             <GroupStyle.HeaderTemplate>
                                 <DataTemplate>
-                                    <TextBlock Text="{Binding Name, StringFormat='{}{0:dddd, MMMM d}'}"
+                                    <TextBlock Text="{Binding Items[0].DayLabel}"
                                                FontSize="12"
                                                FontWeight="SemiBold"
                                                Foreground="{DynamicResource TextSecondary}"
@@ -91,7 +91,7 @@
                             BorderThickness="0"
                             FontSize="26"
                             Foreground="{DynamicResource TextSecondary}"
-                            ToolTip="Add note"/>
+                            ToolTip="{Binding Strings.AddNote}"/>
                     <Button Content="&#x2699;"
                             Command="{Binding OpenSettingsCommand}"
                             Margin="10,0,0,0"
@@ -99,7 +99,7 @@
                             BorderThickness="0"
                             FontSize="26"
                             Foreground="{DynamicResource TextSecondary}"
-                            ToolTip="Settings"/>
+                            ToolTip="{Binding Strings.Settings}"/>
                 </StackPanel>
             </Border>
         </Grid>
@@ -138,7 +138,7 @@
                         BorderThickness="0"
                         FontSize="14"
                         Foreground="{DynamicResource TextSecondary}"
-                        ToolTip="Close entry"
+                        ToolTip="{Binding Strings.CloseEntry}"
                         Command="{Binding CloseEntryCommand}"
                         Visibility="{Binding HasSelection, Converter={StaticResource BoolToVis}}"/>
             </Grid>
@@ -173,10 +173,8 @@
                                 BorderBrush="{DynamicResource Border}"
                                 BorderThickness="1">
                             <TextBlock FontSize="12"
-                                       Foreground="{DynamicResource TextSecondary}">
-                                <Run Text="Created: "/>
-                                <Run Text="{Binding SelectedEntry.CreatedAt, Mode=OneWay, StringFormat='{}{0:dd MMM yyyy, HH:mm}'}"/>
-                            </TextBlock>
+                                       Foreground="{DynamicResource TextSecondary}"
+                                       Text="{Binding SelectedEntry.CreatedLabel, Mode=OneWay}"/>
                         </Border>
                     </StackPanel>
 
